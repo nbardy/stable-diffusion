@@ -97,7 +97,7 @@ def hf_dataset(
         processed = {}
         urls = examples[image_url_column]
 
-        processed[image_key] = [tform(fetch_url(url)) for url in urls]
+        processed[image_key] = [tform(fetch_image(url)) for url in urls]
         processed[caption_key] = examples[text_column]
         return processed
 
