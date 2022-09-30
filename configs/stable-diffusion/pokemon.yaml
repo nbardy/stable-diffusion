@@ -75,9 +75,9 @@ data:
     num_workers: 4
     num_val_workers: 0 # Avoid a weird val dataloader issue
     train:
-      target: ldm.data.simple.hf_dataset
+      target: ldm.data.image_urls.hf_dataset
       params:
-        name: lambdalabs/pokemon-blip-captions
+        name: Nbardy/filtered-laion-wave-data
         image_transforms:
           - target: torchvision.transforms.Resize
             params:
@@ -88,7 +88,7 @@ data:
               size: 512
           - target: torchvision.transforms.RandomHorizontalFlip
     validation:
-      target: ldm.data.simple.TextOnly
+      target: ldm.data.image_urls.TextOnly
       params:
         captions:
           - "A giant barreling wave"
