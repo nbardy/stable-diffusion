@@ -8,6 +8,10 @@ from einops import rearrange
 from ldm.util import instantiate_from_config
 from datasets import load_dataset
 
+from PIL import ImageFile
+
+ImageFile.LOAD_TRUNCATED_IMAGES = True
+
 
 class FolderData(Dataset):
     def __init__(self, root_dir, caption_file, image_transforms, ext="jpg") -> None:
@@ -44,7 +48,7 @@ class FolderData(Dataset):
         im = self.process_im(im)
         caption = self.captions[chosen]
         if caption is None:
-            caption = "old book illustration"
+            caption = "breaking wave"
         return {"jpg": im, "txt": caption}
 
     def process_im(self, im):
@@ -78,9 +82,7 @@ def fetch_image(url):
     else:
         print("Loading from cache", url)
 
-    import cv2
-
-    img = cv2.cvtColor(cv2.imread(filename), cv2.COLOR_BGR2RGB)
+    img = Image.open(filename).convert("RGB")
 
     return img
 
