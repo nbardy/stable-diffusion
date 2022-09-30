@@ -50,6 +50,7 @@ import os
 import requests
 import hashlib
 
+
 # Downloads the image if it isn't cached
 # otherwise loads from cache
 #
@@ -62,8 +63,18 @@ def fetch_image(url):
         os.makedirs("cache")
 
     filename = f"cache/{md5}.jpg"
-    requests.get(url, stream=True).raw.save(filename)
-    return Image.open(filename)
+    requests.get(url, stream=True)
+    if not os.path.exists(filename):
+        print("Downloading", url)
+        img = requests.get(url, stream=True)
+        with open(filename, "wb") as f:
+            f.write(img.content)
+    else:
+        print("Loading from cache", url)
+
+    img = Image.open(filename)
+
+    return img
 
 
 def hf_dataset(
