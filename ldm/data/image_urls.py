@@ -113,8 +113,9 @@ def hf_dataset(
     def pre_process(examples):
         processed = {}
         urls = examples[image_url_column]
+        images = [fetch_image(url) for url in urls]
 
-        processed[image_key] = [tform(fetch_image(url)) for url in urls]
+        processed[image_key] = [tform(im) for im in examples[image_column]]
         processed[caption_key] = examples[text_column]
         return processed
 
