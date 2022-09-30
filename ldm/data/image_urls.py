@@ -80,7 +80,7 @@ def fetch_image(url):
 
     import cv2
 
-    cv2.cvtColor(cv2.imread(filename), cv2.COLOR_BGR2RGB)
+    img = cv2.cvtColor(cv2.imread(filename), cv2.COLOR_BGR2RGB)
 
     return img
 
