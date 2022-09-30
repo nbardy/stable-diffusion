@@ -11,18 +11,18 @@ model:
     cond_stage_key: "txt"
     image_size: 64
     channels: 4
-    cond_stage_trainable: false   # Note: different from the one we trained before
+    cond_stage_trainable: false # Note: different from the one we trained before
     conditioning_key: crossattn
     scale_factor: 0.18215
 
     scheduler_config: # 10000 warmup steps
       target: ldm.lr_scheduler.LambdaLinearScheduler
       params:
-        warm_up_steps: [ 1 ] # NOTE for resuming. use 10000 if starting from scratch
-        cycle_lengths: [ 10000000000000 ] # incredibly large number to prevent corner cases
-        f_start: [ 1.e-6 ]
-        f_max: [ 1. ]
-        f_min: [ 1. ]
+        warm_up_steps: [1] # NOTE for resuming. use 10000 if starting from scratch
+        cycle_lengths: [10000000000000] # incredibly large number to prevent corner cases
+        f_start: [1.e-6]
+        f_max: [1.]
+        f_min: [1.]
 
     unet_config:
       target: ldm.modules.diffusionmodules.openaimodel.UNetModel
@@ -31,9 +31,9 @@ model:
         in_channels: 4
         out_channels: 4
         model_channels: 320
-        attention_resolutions: [ 4, 2, 1 ]
+        attention_resolutions: [4, 2, 1]
         num_res_blocks: 2
-        channel_mult: [ 1, 2, 4, 4 ]
+        channel_mult: [1, 2, 4, 4]
         num_heads: 8
         use_spatial_transformer: True
         transformer_depth: 1
@@ -55,10 +55,10 @@ model:
           out_ch: 3
           ch: 128
           ch_mult:
-          - 1
-          - 2
-          - 4
-          - 4
+            - 1
+            - 2
+            - 4
+            - 4
           num_res_blocks: 2
           attn_resolutions: []
           dropout: 0.0
@@ -68,7 +68,6 @@ model:
     cond_stage_config:
       target: ldm.modules.encoders.modules.FrozenCLIPEmbedder
 
-
 data:
   target: main.DataModuleFromConfig
   params:
@@ -76,29 +75,36 @@ data:
     num_workers: 4
     num_val_workers: 0 # Avoid a weird val dataloader issue
     train:
-      target: ldm.data.simple.hf_dataset
+      target: ldm.data.image_urls.hf_dataset
       params:
-        name: lambdalabs/pokemon-blip-captions
+        name: Nbardy/filtered-laion-wave-data
         image_transforms:
-        - target: torchvision.transforms.Resize
-          params:
-            size: 512
-            interpolation: 3
-        - target: torchvision.transforms.RandomCrop
-          params:
-            size: 512
-        - target: torchvision.transforms.RandomHorizontalFlip
+          - target: torchvision.transforms.Resize
+            params:
+              size: 512
+              interpolation: 3
+          - target: torchvision.transforms.RandomCrop
+            params:
+              size: 512
+          - target: torchvision.transforms.RandomHorizontalFlip
     validation:
-      target: ldm.data.simple.TextOnly
+      target: ldm.data.image_urls.TextOnly
       params:
         captions:
-        - "A pokemon with green eyes, large wings, and a hat"
-        - "A cute bunny rabbit"
-        - "Yoda"
-        - "An epic landscape photo of a mountain"
+          - "A giant barreling wave"
+          - "The most beautiful Fan Wave the world has ever sen"
+          - "Yoda"
+          - "A photo of a breaking Wave"
+          - "Jaws, The world's most dangerous Wave"
+          - "Fractal Wave"
+          - "Seahorse"
+          - "A photo of a seahorse"
+          - "A wave shaped like a seahorse"
+          - "A photo of breaking wave shaped like a seahorse"
+          - "A ying-yang where one side is A Fan Wave and the other side is a giant barreling Jaws Wave"
+          - "A bunny rabbit"
         output_size: 512
         n_gpus: 2 # small hack to sure we see all our samples
-
 
 lightning:
   find_unused_parameters: False
@@ -114,7 +120,7 @@ lightning:
       target: main.ImageLogger
       params:
         batch_frequency: 2000
-        max_images: 4
+        max_images: 12
         increase_log_steps: False
         log_first_step: True
         log_all_val: True
@@ -123,7 +129,7 @@ lightning:
           inpaint: False
           plot_progressive_rows: False
           plot_diffusion_rows: False
-          N: 4
+          N: 12
           unconditional_guidance_scale: 3.0
           unconditional_guidance_label: [""]
 
