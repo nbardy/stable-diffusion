@@ -17,6 +17,11 @@ class FolderData(Dataset):
         self.captions = captions
 
         self.paths = list(self.root_dir.rglob(f"*.{ext}"))
+	print("!!!!!!!!!!")
+	print("!!!!!!!!!!")
+	print("!!!!!!!!!!")
+	print("!!!!!!!!!!")
+	print("Paths")
         print("paths", self.paths)
         image_transforms = [instantiate_from_config(tt) for tt in image_transforms]
         image_transforms.extend(
