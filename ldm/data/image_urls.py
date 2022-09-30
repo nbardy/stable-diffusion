@@ -78,7 +78,9 @@ def fetch_image(url):
     else:
         print("Loading from cache", url)
 
-    img = Image.open(filename)
+    import cv2
+
+    cv2.cvtColor(cv2.imread(filename), cv2.COLOR_BGR2RGB)
 
     return img
 
