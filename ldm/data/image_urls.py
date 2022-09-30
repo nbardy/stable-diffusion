@@ -115,6 +115,7 @@ def hf_dataset(
         urls = examples[image_url_column]
         images = [fetch_image(url) for url in urls]
 
+        print(images)
         processed[image_key] = [tform(im) for im in images]
         processed[caption_key] = examples[text_column]
         return processed
