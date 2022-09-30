@@ -11,12 +11,13 @@ from datasets import load_dataset
 
 class FolderData(Dataset):
     def __init__(self, root_dir, caption_file, image_transforms, ext="jpg") -> None:
-        self.root_dir = Path(root_dir)
+        self.root_dir = Path(root_dir + "/cache")
         with open(caption_file, "rt") as f:
             captions = json.load(f)
         self.captions = captions
 
         self.paths = list(self.root_dir.rglob(f"*.{ext}"))
+        print("paths", self.paths)
         image_transforms = [instantiate_from_config(tt) for tt in image_transforms]
         image_transforms.extend(
             [
