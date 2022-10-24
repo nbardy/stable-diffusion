@@ -22,6 +22,7 @@ from ldm.util import instantiate_from_config
 
 
 MULTINODE_HACKS = False
+wandb_logger = WandbLogger(project='waves-diffusion', log_model="all")
 
 
 def get_parser(**parser_kwargs):
@@ -641,7 +642,7 @@ if __name__ == "__main__":
         # default to ddp
         trainer_config["accelerator"] = "auto"
         if not lightning_config.get("find_unused_parameters", True):
-            trainer_config["strategy"] = "ddp"
+            trainer_config["strategy"] = "ddp_find_unused_parameters_false"
 
         for k in nondefault_trainer_args(opt):
             trainer_config[k] = getattr(opt, k)
@@ -659,6 +660,7 @@ if __name__ == "__main__":
         model = instantiate_from_config(config.model)
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         model.to(device)
+        wandb_logger.watch(model)
 
         if not opt.finetune_from == "":
             print(f"Attempting to load state from {opt.finetune_from}")

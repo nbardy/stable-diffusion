@@ -10,17 +10,23 @@ from datasets import load_dataset
 
 from PIL import ImageFile
 
+import requests
+from io import BytesIO
+
+import os
+import hashlib
+
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
 class FolderData(Dataset):
-    def __init__(self, root_dir, caption_file, image_transforms, ext="jpg") -> None:
+    def __init__(self, root_dir, caption_file, image_transforms) -> None:
         self.root_dir = Path(root_dir + "/cache")
         with open(caption_file, "rt") as f:
             captions = json.load(f)
         self.captions = captions
 
-        self.paths = list(self.root_dir.rglob(f"*.{ext}"))
+        self.paths = list(self.root_dir.rglob(f"*"))
         print("!!!!!!!!!!")
         print("!!!!!!!!!!")
         print("!!!!!!!!!!")
@@ -56,10 +62,25 @@ class FolderData(Dataset):
         return self.tform(im)
 
 
-import os
-import requests
-import hashlib
+import random
+def get_random_file():
+    random_filename = random.choice(os.listdir("cache"))
+    path = os.path.join("cache", random_filename)
 
+    return path
+
+def load_with_random_fallback(filename):
+    try:
+        image = Image.open(filename)
+        image = image.convert("RGB")
+        return image
+    except:
+        # If the image fails to load use a random one instead
+        random_filename = random.choice(os.listdir("cache"))
+        path = os.path.join("cache", random_filename)
+        print(filename + " failed to load")
+        print(path + " is the random fallback")
+        return load_with_random_fallback(path)
 
 # Downloads the image if it isn't cached
 # otherwise loads from cache
@@ -68,21 +89,25 @@ import hashlib
 def fetch_image(url):
     # hash filename
     md5 = hashlib.md5(url.encode("utf-8")).hexdigest()
-    # Check if cache folder exists
-    if not os.path.exists("cache"):
-        os.makedirs("cache")
+    os.makedirs("cache", exist_ok=True)
 
     filename = f"cache/{md5}.jpg"
-    requests.get(url, stream=True)
     if not os.path.exists(filename):
         print("Downloading", url)
-        img = requests.get(url, stream=True)
-        with open(filename, "wb") as f:
-            f.write(img.content)
+        try:
+            response = requests.get(url, stream=True)
+            img = Image.open(BytesIO(response.content))
+            img = img.convert("RGB")
+            img.save(filename, "JPEG")
+        except:
+            print(filename + " failed to load")
+            filename = get_random_file()
+            print(filename + " is the random fallback")
+
     else:
         print("Loading from cache", url)
 
-    img = Image.open(filename).convert("RGB")
+    img = load_with_random_fallback(filename)
 
     return img
 
@@ -119,7 +144,6 @@ def hf_dataset(
         urls = examples[image_url_column]
         images = [fetch_image(url) for url in urls]
 
-        print(images)
         processed[image_key] = [tform(im) for im in images]
         processed[caption_key] = examples[text_column]
         return processed
@@ -153,6 +177,7 @@ class TextOnly(Dataset):
     def __getitem__(self, index):
         dummy_im = torch.zeros(3, self.output_size, self.output_size)
         dummy_im = rearrange(dummy_im * 2.0 - 1.0, "c h w -> h w c")
+        print("text only")
         return {self.image_key: dummy_im, self.caption_key: self.captions[index]}
 
     def _load_caption_file(self, filename):

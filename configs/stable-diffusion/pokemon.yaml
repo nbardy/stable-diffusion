@@ -71,7 +71,7 @@ model:
 data:
   target: main.DataModuleFromConfig
   params:
-    batch_size: 4
+    batch_size: 8
     num_workers: 4
     num_val_workers: 0 # Avoid a weird val dataloader issue
     train:
@@ -92,19 +92,15 @@ data:
       params:
         captions:
           - "A giant barreling wave"
-          - "The most beautiful Fan Wave the world has ever sen"
-          - "Yoda"
+          - "The most beautiful Fan Wave the world has ever seen"
           - "A photo of a breaking Wave"
           - "Jaws, The world's most dangerous Wave"
           - "Fractal Wave"
           - "Seahorse"
-          - "A photo of a seahorse"
           - "A wave shaped like a seahorse"
-          - "A photo of breaking wave shaped like a seahorse"
           - "A ying-yang where one side is A Fan Wave and the other side is a giant barreling Jaws Wave"
-          - "A bunny rabbit"
         output_size: 512
-        n_gpus: 2 # small hack to sure we see all our samples
+        n_gpus: 1 # small hack to sure we see all our samples
 
 lightning:
   find_unused_parameters: False
@@ -120,7 +116,7 @@ lightning:
       target: main.ImageLogger
       params:
         batch_frequency: 2000
-        max_images: 12
+        max_images: 8
         increase_log_steps: False
         log_first_step: True
         log_all_val: True
@@ -129,7 +125,7 @@ lightning:
           inpaint: False
           plot_progressive_rows: False
           plot_diffusion_rows: False
-          N: 12
+          N: 8
           unconditional_guidance_scale: 3.0
           unconditional_guidance_label: [""]
 
